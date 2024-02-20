@@ -1,28 +1,31 @@
-def check_line(matrix, rename, line):
-    for j in range(len(matrix)):
-        if j not in rename:
-            if matrix[line][j] == 1:
-                return False
-    return True
-
 
 def main():
     n, m = map(int, input().split())
-    matrix = [[0 for _ in range(n)] for __ in range(n)]
+    start_points = dict()
+    finish_points = dict()
+    points = {i + 1 for i in range(n)}
     for _ in range(m):
         start, finish = map(int, input().split())
-        matrix[start - 1][finish - 1] = 1
+        if start_points.get(start) is None:
+            start_points[start] = set()
+        start_points[start].add(finish)
+        if finish_points.get(finish) is None:
+            finish_points[finish] = set()
+        finish_points[finish].add(start)
+        points.discard(start)
+
     rename = [-1 for _ in range(n)]
     cur = n
-    q = True
-    while cur > 0 and q:
-        q = False
-        for i in range(n):
-            if i not in rename:
-                if check_line(matrix, rename, i):
-                    rename[cur - 1] = i
-                    cur -= 1
-                    q = True
+    while len(points) > 0:
+        el = points.pop()
+        rename[el - 1] = cur - 1
+        cur -= 1
+        for i in finish_points.get(el, set()):
+            temp = start_points.get(i, set())
+            temp.remove(el)
+            if len(temp) == 0:
+                points.add(i)
+
     if rename[0] == -1:
         print('-1')
         return
